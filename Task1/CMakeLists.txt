@@ -1,0 +1,44 @@
+cmake_minimum_required(VERSION 3.16)# Проверка версии CMake.
+									# Если версия установленной программы
+									# старее указаной, произойдёт аварийный выход.
+
+set(CMAKE_CXX_STANDARD 11)          # стандарт компилятора
+
+project(SupComp_task1)			    # Название проекта
+
+
+#compiler flags
+set(CMAKE_CXX_FLAGS_DEBUG "-Og -g -Wall -Wextra -pedantic -fsanitize=leak, -fsanitize=undefinded, -fsanitize=memory")
+set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -flto -march=native")
+
+
+
+set(SOURCE_EXE main.cpp)		    # Установка переменной со списком исходников для исполняемого файла
+
+
+include_directories(include)
+set(SOURCE_LIB 
+    src/coeff_calc.cpp
+    src/geom_calc.cpp
+    src/get_matrix.cpp
+    src/Point.cpp)			        # Тоже самое, но для библиотеки
+add_library(calc_lib STATIC ${SOURCE_LIB})	# Создание статической библиотеки с именем calc_lib
+
+
+
+add_executable(main ${SOURCE_EXE})		# Создает исполняемый файл с именем main
+
+target_link_libraries(main PUBLIC calc_lib)		# Линковка программы с библиотекой
+
+
+
+
+
+
+# Чтобы получить значение переменной: ${var_name}
+# При линковке указываются все необходимые библиотеки:
+    # target_link_libraries(main  lib1
+    # lib2
+    # lib3)
+
+# cmake -DCMAKE_BUILD_TYPE=Debug - выбор набора флагов компиляции
