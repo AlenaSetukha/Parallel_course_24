@@ -99,6 +99,7 @@ int main(int argc, char **argv)
 
         if (get_normC(w_k1, w_k) < delta)
         {
+            std::cout << "Достигнута точность! Количество шагов: " << k << std::endl;
             break;
         } else {
             for (int j = 1; j < Ns - 1; j++) { //y
@@ -108,6 +109,7 @@ int main(int argc, char **argv)
             }
         }
     }
+
     //========Запись ответа========
     std::ofstream fout_res(result_dir + "res.txt");
     if (!fout_res.is_open()) {

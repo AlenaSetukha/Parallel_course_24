@@ -26,24 +26,30 @@ def read_data(coord_file, value_file):
 
 
 def plot_function_on_grid(x, y, z):
-    # Код функции остался без изменений (как в предыдущем ответе)
-    if len(x) == 0 or len(y) == 0 or z.shape != (len(y), len(x)):
-        raise ValueError("Неправильные размеры входных данных.")
+    unique_x = np.unique(x)
+    unique_y = np.unique(y)
     
-    X, Y = np.meshgrid(x, y)
+    X, Y = np.meshgrid(unique_x, unique_y)
+    Z = z.reshape(len(unique_y), len(unique_x))
 
-    plt.figure(figsize=(8, 6))
-    contour = plt.contourf(X, Y, z, levels=20, cmap='viridis')
-    plt.colorbar(contour, label='Значение функции')
-    plt.title('Значения функции на двумерной сетке')
-    plt.xlabel('X')
-    plt.ylabel('Y')
-    plt.grid(True)
+    fig = plt.figure(figsize=(10, 7))
+    ax = fig.add_subplot(111, projection='3d')
+
+    ax.plot_surface(X, Y, Z, cmap='viridis', edgecolor='none')
+
+    # Настройка графика
+    ax.set_title('Analutical solution z = (1 - x^2 - 4y^2) / 10')
+    ax.set_xlabel('X axis')
+    ax.set_ylabel('Y axis')
+    ax.set_zlabel('Z axis')
+
+    # Показ графика
     plt.show()
+
+
 
 # Пример использования функций
 coord_file = 'results/grid.txt'  # Файл с координатами (CSV)
 value_file = 'results/res.txt'  # Файл со значениями функции (CSV)
-
 x, y, z = read_data(coord_file, value_file)
 plot_function_on_grid(x, y, z)
