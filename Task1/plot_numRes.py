@@ -38,7 +38,7 @@ def plot_function_on_grid(x, y, z):
     ax.plot_surface(X, Y, Z, cmap='viridis', edgecolor='none')
 
     # Настройка графика
-    ax.set_title('Analutical solution z = (1 - x^2 - 4y^2) / 10')
+    ax.set_title('Numerical Solution')
     ax.set_xlabel('X axis')
     ax.set_ylabel('Y axis')
     ax.set_zlabel('Z axis')
