@@ -36,24 +36,10 @@ add_library(calc_lib STATIC ${SOURCE_LIB})	# Создание статическ
 
 
 
+set(SOURCE_EXE main_Sequent.cpp)		    # Установка переменной со списком исходников для исполняемого файла
+add_executable(main_Sequent ${SOURCE_EXE})		# Создает исполняемый файл с именем main_Sequent
+target_link_libraries(main_Sequent PUBLIC calc_lib)		# Линковка программы с библиотекой
 
-#set(SOURCE_EXE main_Sequent.cpp)		    # Установка переменной со списком исходников для исполняемого файла
-#add_executable(main_Sequent ${SOURCE_EXE})		# Создает исполняемый файл с именем main_Sequent
-#target_link_libraries(main_Sequent PUBLIC calc_lib)		# Линковка программы с библиотекой
-
-set(SOURCE_EXE main_OpenMP.cpp)		    # Установка переменной со списком исходников для исполняемого файла
-add_executable(main_OpenMP ${SOURCE_EXE})		# Создает исполняемый файл с именем main_OpenMP
-target_link_libraries(main_OpenMP PUBLIC calc_lib)		# Линковка программы с библиотекой
-
-
-
-
-
-
-# Чтобы получить значение переменной: ${var_name}
-# При линковке указываются все необходимые библиотеки:
-    # target_link_libraries(main  lib1
-    # lib2
-    # lib3)
-
-# cmake -DCMAKE_BUILD_TYPE=Debug - выбор набора флагов компиляции
+#set(SOURCE_EXE main_OpenMP.cpp)		    # Установка переменной со списком исходников для исполняемого файла
+#add_executable(main_OpenMP ${SOURCE_EXE})		# Создает исполняемый файл с именем main_OpenMP
+#target_link_libraries(main_OpenMP PUBLIC calc_lib)		# Линковка программы с библиотекой

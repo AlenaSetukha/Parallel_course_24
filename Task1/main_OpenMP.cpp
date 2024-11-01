@@ -8,6 +8,7 @@
 #include <chrono>
 #include <vector>
 #include <string>
+#include <stdexcept>
 
 #include "Point.hpp"
 #include "get_matrix.hpp"

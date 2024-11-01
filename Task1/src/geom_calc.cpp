@@ -1,7 +1,10 @@
 #include <iostream>
 #include <vector>
 #include <numeric>
-#include <omp.h> 
+#include <omp.h>
+#include <cmath>
+ 
+
 #include "Point.hpp"
 
 double get_Area(const std::vector<Point>& vertices)

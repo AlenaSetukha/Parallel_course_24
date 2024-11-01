@@ -7,6 +7,7 @@
 #include <chrono>
 #include <vector>
 #include <string>
+#include <stdexcept>
 
 #include "Point.hpp"
 #include "get_matrix.hpp"
@@ -87,14 +88,6 @@ int main(int argc, char **argv)
             }
         }
         norm = get_normC(w_k1, w_k); //сделать поиск максимум по всем узлам, не только внутренним
-if (k == 10)
-{
-    std::cout << "На 10-м шаге: " << std::endl;
-    std::cout << "      w_10[2][5] = " << w_k1[2][5] << std::endl;
-    std::cout << "      w_10[45][40] = " << w_k1[45][40] << std::endl;
-    std::cout << "      w_10[50][40] = " << w_k1[50][40] << std::endl;
-    std::cout << "      norm = " << norm << std::endl;
-}
         if (norm < delta)
         {
             std::cout << "Достигнута точность! Количество шагов: " << k << std::endl;
