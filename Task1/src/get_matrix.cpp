@@ -144,16 +144,13 @@ double get_IterParam(const std::vector<std::vector<double>>& aCoeff,
 
 
 void get_constMatrixOMP(const std::vector<std::vector<Point>>& grid,
-        const double eps, const int num_threads, 
-        std::vector<std::vector<double>>& B,
+        const double eps, std::vector<std::vector<double>>& B,
         std::vector<std::vector<double>>& a_CoeffMatrix,
         std::vector<std::vector<double>>& b_CoeffMatrix)
 {
     int Ns = grid.size(), Ms = grid[0].size();
     double h1 = std::abs(grid[0][0].x - grid[0][1].x);
     double h2 = std::abs(grid[0][0].y - grid[1][0].y);
-    omp_set_dynamic(0);
-    omp_set_num_threads(num_threads);
     #pragma omp parallel for
     for (int j = 1; j < Ns; j++)//y
     {
@@ -179,13 +176,11 @@ void get_rkOMP(const std::vector<std::vector<double>>& aCoeff,
         const std::vector<std::vector<double>>& bCoeff,
         const std::vector<std::vector<double>>& wk,
         const std::vector<std::vector<double>>& B,
-        const double h1, const double h2, const int num_threads,
+        const double h1, const double h2,
         std::vector<std::vector<double>>& r_k)
 {
     // rk = Awk - B
     int Ns = wk.size(), Ms = wk[0].size();
-    omp_set_dynamic(0);
-    omp_set_num_threads(num_threads);
     #pragma omp parallel for collapse(2)
     for (int j = 1; j < Ns - 1; j++)//y
     {
@@ -207,12 +202,10 @@ double get_IterParam_OMP(const std::vector<std::vector<double>>& aCoeff,
         const std::vector<std::vector<double>>& bCoeff,
         const double h1, const double h2,
         const std::vector<std::vector<double>>& r_k,
-        const int num_threads, std::vector<std::vector<double>>& Ar)
+        std::vector<std::vector<double>>& Ar)
 {
     // A примененное к rk
     int Ns = r_k.size(), Ms = r_k[0].size();
-    omp_set_dynamic(0);
-    omp_set_num_threads(num_threads);
     #pragma omp parallel for collapse(2)
     for (int j = 1; j < Ns - 1; j++)//y
     {
@@ -226,8 +219,8 @@ double get_IterParam_OMP(const std::vector<std::vector<double>>& aCoeff,
         }
     }
 
-    return scal_prod_OMP(r_k, r_k, num_threads, h1, h2) /
-                 scal_prod_OMP(Ar, r_k, num_threads, h1, h2);
+    return scal_prod_OMP(r_k, r_k, h1, h2) /
+                 scal_prod_OMP(Ar, r_k, h1, h2);
 }
 
 
@@ -237,22 +230,19 @@ void sol_StepOMP(const std::vector<std::vector<double>>& aCoeff,
         const std::vector<std::vector<double>>& bCoeff,
         const std::vector<std::vector<double>>& wk,
         const std::vector<std::vector<double>>& B,
-        const double h1, const double h2, const int num_threads,
+        const double h1, const double h2,
         std::vector<std::vector<double>>& r_k,
         std::vector<std::vector<double>>& Ar,
         std::vector<std::vector<double>>& wk1)
 {
     // rk = Awk - B
-    get_rkOMP(aCoeff, bCoeff, wk, B, h1, h2, num_threads, r_k);
+    get_rkOMP(aCoeff, bCoeff, wk, B, h1, h2,r_k);
 
     // tau_k1 = (rk, rk) / (Ark, rk)
-    double tau_k1 = get_IterParam_OMP(aCoeff, bCoeff, h1, h2, r_k,
-            num_threads, Ar);
+    double tau_k1 = get_IterParam_OMP(aCoeff, bCoeff, h1, h2, r_k, Ar);
 
     // wk1 = wk - tau_k1 * rk
     int Ns = wk.size(), Ms = wk[0].size();
-    omp_set_dynamic(0);
-    omp_set_num_threads(num_threads);
     #pragma omp parallel for collapse(2)
     for (int j = 1; j < Ns - 1; j++) { //y
         for (int i = 1; i < Ms - 1; i++) { //x

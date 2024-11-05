@@ -20,26 +20,23 @@ endif()
 
 
 
-
-include_directories(include)
+include_directories(include)               # Где искать заголовочные файлы
 set(SOURCE_LIB 
     src/coeff_calc.cpp
     src/geom_calc.cpp
     src/get_matrix.cpp
     src/Point.cpp
-    src/write_toFile.cpp)			        # Тоже самое, но для библиотеки
+    src/write_toFile.cpp)
 add_library(calc_lib STATIC ${SOURCE_LIB})	# Создание статической библиотеки с именем calc_lib
 
 
+#set(SOURCE_EXE main_Sequent.cpp)		        # Установка переменной со списком исходников для исполняемого файла
+#add_executable(main_Sequent ${SOURCE_EXE})		# Создает исполняемый файл с именем main_Sequent
+#target_link_libraries(main_Sequent PUBLIC calc_lib)		# Линковка программы с библиотекой
 
 
 
 
-
-set(SOURCE_EXE main_Sequent.cpp)		    # Установка переменной со списком исходников для исполняемого файла
-add_executable(main_Sequent ${SOURCE_EXE})		# Создает исполняемый файл с именем main_Sequent
-target_link_libraries(main_Sequent PUBLIC calc_lib)		# Линковка программы с библиотекой
-
-#set(SOURCE_EXE main_OpenMP.cpp)		    # Установка переменной со списком исходников для исполняемого файла
-#add_executable(main_OpenMP ${SOURCE_EXE})		# Создает исполняемый файл с именем main_OpenMP
-#target_link_libraries(main_OpenMP PUBLIC calc_lib)		# Линковка программы с библиотекой
+set(SOURCE_EXE main_OpenMP.cpp)		    # Установка переменной со списком исходников для исполняемого файла
+add_executable(main_OpenMP ${SOURCE_EXE})		# Создает исполняемый файл с именем main_OpenMP
+target_link_libraries(main_OpenMP PUBLIC calc_lib)		# Линковка программы с библиотекой

@@ -42,8 +42,7 @@ double scal_prod(const std::vector<std::vector<double>>& a,
 
 
 double scal_prod_OMP(const std::vector<std::vector<double>>& a, 
-                 const std::vector<std::vector<double>>& b, 
-                 const int num_threads,
+                 const std::vector<std::vector<double>>& b,
                  const double h1, const double h2) 
 {
     if (a.empty() || b.empty() || a.size() != b.size() || a[0].empty()) {
@@ -51,8 +50,6 @@ double scal_prod_OMP(const std::vector<std::vector<double>>& a,
     }
     double res = 0.0;
     int Ns = a.size(), Ms = a[0].size();
-    omp_set_dynamic(0);
-    omp_set_num_threads(num_threads);
     #pragma omp parallel for reduction(+ : res)
     for (int j = 1; j < Ns - 1; j++) { // y
         res += std::inner_product(a[j].begin() + 1, a[j].end() - 1, 
@@ -92,8 +89,7 @@ double get_normC(const std::vector<std::vector<double>> a,
 
 
 double get_normC_OMP(const std::vector<std::vector<double>> a, 
-                const std::vector<std::vector<double>> b,
-                const int num_threads)
+                const std::vector<std::vector<double>> b)
 {
     if (a.size() != b.size() || a.empty() || b.empty() || a[0].size() != b[0].size()) {
         throw std::invalid_argument("Matrices size: get_normC");

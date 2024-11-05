@@ -35,6 +35,9 @@ int main(int argc, char **argv)
     int Ns, Ms, k_max;
     double A1, B1, A2, B2, delta;
 
+    omp_set_dynamic(0);
+    omp_set_num_threads(num_threads);
+
     //====Считывание параметров====
     std::ifstream fin(param_fName);
     if (!fin.is_open()) {
@@ -50,8 +53,6 @@ int main(int argc, char **argv)
     const double eps = std::max(h1, h2) * std::max(h1, h2);
     std::vector<std::vector<Point>> grid(Ns + 1, std::vector<Point>(Ms + 1));
 
-    omp_set_dynamic(0);
-    omp_set_num_threads(num_threads);
     #pragma omp parallel for
     for (int j = 0; j < Ns + 1; j++) { //y
         for (int i = 0; i < Ms + 1; i++) { //x
@@ -67,7 +68,7 @@ int main(int argc, char **argv)
     std::vector<std::vector<double>> B(Ns + 1, std::vector<double>(Ms + 1, 0.));          // матрица B = F[i][j]
     std::vector<std::vector<double>> a_CoeffMatrix(Ns + 1, std::vector<double>(Ms + 1, 0.));  // матрица a[i][j]
     std::vector<std::vector<double>> b_CoeffMatrix(Ns + 1, std::vector<double>(Ms + 1, 0.));  // матрица b[i][j]
-    get_constMatrixOMP(grid, eps, num_threads, B, a_CoeffMatrix, b_CoeffMatrix);
+    get_constMatrixOMP(grid, eps, B, a_CoeffMatrix, b_CoeffMatrix);
 
     //=====Итерационный процесс====
     std::vector<std::vector<double>> w_k(Ns + 1, std::vector<double>(Ms + 1, 0.));      // стартовое приближение
@@ -79,17 +80,15 @@ int main(int argc, char **argv)
     for (int k = 1; k < k_max; k++)
     {
         sol_StepOMP(a_CoeffMatrix, b_CoeffMatrix, w_k, B,
-                h1, h2, num_threads, r_k, Ar, w_k1);
+                h1, h2, r_k, Ar, w_k1);
 
-        norm = get_normC_OMP(w_k1, w_k, num_threads);
+        norm = get_normC_OMP(w_k1, w_k);
 
         if (norm < delta)
         {
             std::cout << "Достигнута точность! Количество шагов: " << k << std::endl;
             break;
         } else {
-            omp_set_dynamic(0);
-            omp_set_num_threads(num_threads);
             #pragma omp parallel for collapse(2)
             for (int j = 1; j < Ns - 1; j++) { //y
                 for (int i = 1; i < Ms - 1; i++) { //x

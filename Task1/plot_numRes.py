@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import argparse
 
 
 def read_data(coord_file, value_file):
@@ -47,9 +48,16 @@ def plot_function_on_grid(x, y, z):
     plt.show()
 
 
+def main():
+    parser = argparse.ArgumentParser(description='Plot function on grid from files.')
+    parser.add_argument('coord_file', type=str, help='File containing coordinates (grid.txt)')
+    parser.add_argument('value_file', type=str, help='File containing function values (res.txt)')
 
-# Пример использования функций
-coord_file = 'results/grid.txt'  # Файл с координатами (CSV)
-value_file = 'results/res.txt'  # Файл со значениями функции (CSV)
-x, y, z = read_data(coord_file, value_file)
-plot_function_on_grid(x, y, z)
+    args = parser.parse_args()
+
+    x, y, z = read_data(args.coord_file, args.value_file)
+    plot_function_on_grid(x, y, z)
+
+
+if __name__ == "__main__":
+    main()
