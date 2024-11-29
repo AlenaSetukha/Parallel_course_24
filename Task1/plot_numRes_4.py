@@ -26,7 +26,7 @@ def read_data(coord_file, value_file):
     return x, y, values
 
 
-def plot_function_on_grid(x1, y1, z1):
+def plot_function_on_grid(x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4):
 
     unique_x1 = np.unique(x1)
     unique_y1 = np.unique(y1)
@@ -35,10 +35,32 @@ def plot_function_on_grid(x1, y1, z1):
     Z1 = z1.reshape(len(unique_y1), len(unique_x1))
 
 
+    unique_x2 = np.unique(x2)
+    unique_y2 = np.unique(y2)
+
+    X2, Y2 = np.meshgrid(unique_x2, unique_y2)
+    Z2 = z2.reshape(len(unique_y2), len(unique_x2))
+
+    unique_x3 = np.unique(x3)
+    unique_y3 = np.unique(y3)
+
+    X3, Y3 = np.meshgrid(unique_x3, unique_y3)
+    Z3 = z3.reshape(len(unique_y3), len(unique_x3))
+
+    unique_x4 = np.unique(x4)
+    unique_y4 = np.unique(y4)
+
+    X4, Y4 = np.meshgrid(unique_x4, unique_y4)
+    Z4 = z4.reshape(len(unique_y4), len(unique_x4))
+
+
     fig = plt.figure(figsize=(10, 7))
     ax = fig.add_subplot(111, projection='3d')
 
     ax.plot_surface(X1, Y1, Z1, cmap='viridis', edgecolor='none')
+    ax.plot_surface(X2, Y2, Z2, cmap='viridis', edgecolor='none')
+    ax.plot_surface(X3, Y3, Z3, cmap='viridis', edgecolor='none')
+    ax.plot_surface(X4, Y4, Z4, cmap='viridis', edgecolor='none')
 
     # Настройка графика
     ax.set_title('Numerical Solution')
@@ -56,10 +78,22 @@ def main():
     parser.add_argument('coord_file1', type=str, help='File containing coordinates (grid.txt)')
     parser.add_argument('value_file1', type=str, help='File containing function values (res.txt)')
 
+    parser.add_argument('coord_file2', type=str, help='File containing coordinates (grid.txt)')
+    parser.add_argument('value_file2', type=str, help='File containing function values (res.txt)')
+
+    parser.add_argument('coord_file3', type=str, help='File containing coordinates (grid.txt)')
+    parser.add_argument('value_file3', type=str, help='File containing function values (res.txt)')
+
+    parser.add_argument('coord_file4', type=str, help='File containing coordinates (grid.txt)')
+    parser.add_argument('value_file4', type=str, help='File containing function values (res.txt)')
+
     args = parser.parse_args()
 
     x1, y1, z1 = read_data(args.coord_file1, args.value_file1)
-    plot_function_on_grid(x1, y1, z1)
+    x2, y2, z2 = read_data(args.coord_file2, args.value_file2)
+    x3, y3, z3 = read_data(args.coord_file3, args.value_file3)
+    x4, y4, z4 = read_data(args.coord_file4, args.value_file4)
+    plot_function_on_grid(x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4)
 
 
 if __name__ == "__main__":

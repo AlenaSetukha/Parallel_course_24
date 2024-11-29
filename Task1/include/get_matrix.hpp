@@ -65,10 +65,25 @@ double get_IterParam(const std::vector<std::vector<double>>& aCoeff,
 
 //======================Константные матрицы==========================
 //=======================параллельный набор==========================
+void get_matrixA_OMP(const double** aCoeff, const double** bCoeff,
+        const int start_Xindx,
+        const double** wk, const double h1, const double h2,
+        const int N_ofDomen, const int M_ofDomen, double** r_k);
+
+
+
+        
 void get_constMatrixOMP(const std::vector<std::vector<Point>>& grid,
         const double eps, std::vector<std::vector<double>>& B,
         std::vector<std::vector<double>>& a_CoeffMatrix,
         std::vector<std::vector<double>>& b_CoeffMatrix);
+
+void get_constMatrixOMP(const Point** grid, const double eps,
+        const int Ns, const int Ms, double** B,
+        double** a_CoeffMatrix, double** b_CoeffMatrix);
+
+
+
 
 
 
@@ -78,6 +93,15 @@ void get_rkOMP(const std::vector<std::vector<double>>& aCoeff,
         const std::vector<std::vector<double>>& B,
         const double h1, const double h2,
         std::vector<std::vector<double>>& r_k);
+
+
+void get_rkOMP(const double** aCoeff, const double** bCoeff,
+        const double** B, const int start_Xindx, const double** wk, 
+        const int N_ofDomen, const int M_ofDomen,
+        const double h1, const double h2, double** r_k);
+
+
+
 
 
 double get_IterParam_OMP(const std::vector<std::vector<double>>& aCoeff,
@@ -94,5 +118,6 @@ void sol_StepOMP(const std::vector<std::vector<double>>& aCoeff,
         std::vector<std::vector<double>>& r_k,
         std::vector<std::vector<double>>& Ar,
         std::vector<std::vector<double>>& wk1);
+
 
 #endif

@@ -18,9 +18,12 @@ if (OPENMP_FOUND)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
 
-
+# Поиск пакета MPI
+find_package(MPI REQUIRED)
 
 include_directories(include)               # Где искать заголовочные файлы
+
+
 set(SOURCE_LIB 
     src/coeff_calc.cpp
     src/geom_calc.cpp
@@ -30,13 +33,12 @@ set(SOURCE_LIB
 add_library(calc_lib STATIC ${SOURCE_LIB})	# Создание статической библиотеки с именем calc_lib
 
 
-#set(SOURCE_EXE main_Sequent.cpp)		        # Установка переменной со списком исходников для исполняемого файла
-#add_executable(main_Sequent ${SOURCE_EXE})		# Создает исполняемый файл с именем main_Sequent
-#target_link_libraries(main_Sequent PUBLIC calc_lib)		# Линковка программы с библиотекой
+set(SOURCE_EXE main_MPI_2.cpp)		        # Установка переменной со списком исходников для исполняемого файла
+add_executable(main_MPI ${SOURCE_EXE})		# Создает исполняемый файл с именем main_Sequent
+target_link_libraries(main_MPI PUBLIC calc_lib)		# Линковка программы с библиотекой
+# Связывание MPI с вашим исполняемым файлом
+target_link_libraries(main_MPI PUBLIC MPI::MPI_CXX)
 
 
 
 
-set(SOURCE_EXE main_OpenMP.cpp)		    # Установка переменной со списком исходников для исполняемого файла
-add_executable(main_OpenMP ${SOURCE_EXE})		# Создает исполняемый файл с именем main_OpenMP
-target_link_libraries(main_OpenMP PUBLIC calc_lib)		# Линковка программы с библиотекой

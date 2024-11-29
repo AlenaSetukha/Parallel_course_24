@@ -26,7 +26,7 @@ def read_data(coord_file, value_file):
     return x, y, values
 
 
-def plot_function_on_grid(x1, y1, z1):
+def plot_function_on_grid(x1, y1, z1, x2, y2, z2):
 
     unique_x1 = np.unique(x1)
     unique_y1 = np.unique(y1)
@@ -35,10 +35,18 @@ def plot_function_on_grid(x1, y1, z1):
     Z1 = z1.reshape(len(unique_y1), len(unique_x1))
 
 
+    unique_x2 = np.unique(x2)
+    unique_y2 = np.unique(y2)
+
+    X2, Y2 = np.meshgrid(unique_x2, unique_y2)
+    Z2 = z2.reshape(len(unique_y2), len(unique_x2))
+
+
     fig = plt.figure(figsize=(10, 7))
     ax = fig.add_subplot(111, projection='3d')
 
     ax.plot_surface(X1, Y1, Z1, cmap='viridis', edgecolor='none')
+    ax.plot_surface(X2, Y2, Z2, cmap='viridis', edgecolor='none')
 
     # Настройка графика
     ax.set_title('Numerical Solution')
@@ -56,10 +64,14 @@ def main():
     parser.add_argument('coord_file1', type=str, help='File containing coordinates (grid.txt)')
     parser.add_argument('value_file1', type=str, help='File containing function values (res.txt)')
 
+    parser.add_argument('coord_file2', type=str, help='File containing coordinates (grid.txt)')
+    parser.add_argument('value_file2', type=str, help='File containing function values (res.txt)')
+
     args = parser.parse_args()
 
     x1, y1, z1 = read_data(args.coord_file1, args.value_file1)
-    plot_function_on_grid(x1, y1, z1)
+    x2, y2, z2 = read_data(args.coord_file2, args.value_file2)
+    plot_function_on_grid(x1, y1, z1, x2, y2, z2)
 
 
 if __name__ == "__main__":

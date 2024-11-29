@@ -30,11 +30,29 @@ double scal_prod(const std::vector<std::vector<double>>& a,
         throw std::invalid_argument("Invalid input vectors");
     }
     double res = 0.0;
-    int Ns = a.size(), Ms = a[0].size();
+    int Ns1 = a.size(), Ms1 = a[0].size();
     
-    for (int j = 1; j < Ns - 1; j++) { // y
+    for (int j = 1; j < Ns1 - 1; j++) { // y
         res += std::inner_product(a[j].begin() + 1, a[j].end() - 1, 
                                   b[j].begin() + 1, 0.0);
+    }
+    return res * h1 * h2;
+}
+
+
+
+double scal_prod(const double** a, const double** b, 
+                 const int Ns, const int Ms,
+                 const double h1, const double h2) 
+{
+    double res = 0.0;
+    
+    for (int j = 1; j < Ns; j++) { // y
+        //res += std::inner_product(&a[j][1], &a[j][Ms - 1], 
+        //                          &b[j][1], 0.0);
+        for (int i = 1; i < Ms; i++) {
+            res += a[j][i] * b[j][i];
+        }
     }
     return res * h1 * h2;
 }
@@ -49,9 +67,9 @@ double scal_prod_OMP(const std::vector<std::vector<double>>& a,
         throw std::invalid_argument("Invalid input vectors");
     }
     double res = 0.0;
-    int Ns = a.size(), Ms = a[0].size();
+    int Ns1 = a.size(), Ms1 = a[0].size();
     #pragma omp parallel for reduction(+ : res)
-    for (int j = 1; j < Ns - 1; j++) { // y
+    for (int j = 1; j < Ns1 - 1; j++) { // y
         res += std::inner_product(a[j].begin() + 1, a[j].end() - 1, 
                                   b[j].begin() + 1, 0.0);
     }
@@ -77,15 +95,29 @@ double get_normC(const std::vector<std::vector<double>> a,
         throw std::invalid_argument("Matrices size: get_normC");
     }
     double res = 0.0;
-    int Ns = a.size(), Ms = a[0].size();
-    for (int j = 1; j < Ns - 1; j++) { // y
-        for (int i = 1; i < Ms - 1; i++) { // x
+    int Ns1 = a.size(), Ms1 = a[0].size();
+    for (int j = 1; j < Ns1 - 1; j++) { // y
+        for (int i = 1; i < Ms1 - 1; i++) { // x
             double diff = std::abs(a[j][i] - b[j][i]);
             res = std::max(res, diff);
         }
     }
     return res;
 }
+
+double get_normC(const double** a, const double** b,
+                 const int Ns, const int Ms)
+{
+    double res = 0.0;
+    for (int j = 1; j < Ns; j++) { // y
+        for (int i = 1; i < Ms; i++) { // x
+            double diff = std::abs(a[j][i] - b[j][i]);
+            res = std::max(res, diff);
+        }
+    }
+    return res;
+}
+
 
 
 double get_normC_OMP(const std::vector<std::vector<double>> a, 
@@ -95,13 +127,13 @@ double get_normC_OMP(const std::vector<std::vector<double>> a,
         throw std::invalid_argument("Matrices size: get_normC");
     }
     double res = 0.0;
-    int Ns = a.size(), Ms = a[0].size();
+    int Ns1 = a.size(), Ms1 = a[0].size();
     #pragma omp parallel
     {
         double local_res = 0.0;
         #pragma omp for
-        for (int j = 1; j < Ns - 1; j++) { // y
-            for (int i = 1; i < Ms - 1; i++) { // x
+        for (int j = 1; j < Ns1 - 1; j++) { // y
+            for (int i = 1; i < Ms1 - 1; i++) { // x
                 double diff = std::abs(a[j][i] - b[j][i]);
                 if (diff > local_res) {
                     local_res = diff;

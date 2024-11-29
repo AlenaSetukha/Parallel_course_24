@@ -28,7 +28,7 @@
 
 int main(int argc, char **argv)
 {
-    const std::string param_fName = argc > 1 ? argv[1] : "../data/param.txt",\
+    const std::string param_fName = argc > 1 ? argv[1] : "../data/param_90_80.txt",\
                       result_dir = argc > 2 ? argv[2] : "../results/";
     int num_threads = argc > 3 ? std::stoi(argv[3]) : 4;
     auto start = std::chrono::high_resolution_clock::now();
@@ -59,7 +59,7 @@ int main(int argc, char **argv)
             grid[j][i] = Point(A1 + i * h1, B2 - j * h2);
         }
     }
-    write_GridToFile(result_dir, Ms, Ns, grid);
+    write_GridToFile(result_dir, grid);
 
 
 
@@ -69,6 +69,11 @@ int main(int argc, char **argv)
     std::vector<std::vector<double>> a_CoeffMatrix(Ns + 1, std::vector<double>(Ms + 1, 0.));  // матрица a[i][j]
     std::vector<std::vector<double>> b_CoeffMatrix(Ns + 1, std::vector<double>(Ms + 1, 0.));  // матрица b[i][j]
     get_constMatrixOMP(grid, eps, B, a_CoeffMatrix, b_CoeffMatrix);
+
+    write_MatrixToFile(result_dir + "a_coeff.txt", a_CoeffMatrix);
+    write_MatrixToFile(result_dir + "b_coeff.txt", b_CoeffMatrix);
+    write_MatrixToFile(result_dir + "B.txt", B);
+
 
     //=====Итерационный процесс====
     std::vector<std::vector<double>> w_k(Ns + 1, std::vector<double>(Ms + 1, 0.));      // стартовое приближение
@@ -82,7 +87,9 @@ int main(int argc, char **argv)
         sol_StepOMP(a_CoeffMatrix, b_CoeffMatrix, w_k, B,
                 h1, h2, r_k, Ar, w_k1);
 
-        norm = get_normC_OMP(w_k1, w_k);
+        norm = get_normC(w_k1, w_k);
+        
+std::cout << norm << std::endl;
 
         if (norm < delta)
         {
@@ -100,7 +107,7 @@ int main(int argc, char **argv)
     std::cout << "Предельное число шагов: " << k_max << std::endl;
     std::cout << "Достигнутая норма: " << norm << std::endl;
     //========Запись ответа========
-    write_SolToFile(result_dir, Ms, Ns, w_k);
+    write_SolToFile(result_dir, w_k);
 
     //========Расчет времени=======
     auto end = std::chrono::high_resolution_clock::now();
