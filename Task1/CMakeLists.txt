@@ -33,11 +33,11 @@ set(SOURCE_LIB
 add_library(calc_lib STATIC ${SOURCE_LIB})	# Создание статической библиотеки с именем calc_lib
 
 
-set(SOURCE_EXE main_MPI_2.cpp)		        # Установка переменной со списком исходников для исполняемого файла
-add_executable(main_MPI ${SOURCE_EXE})		# Создает исполняемый файл с именем main_Sequent
-target_link_libraries(main_MPI PUBLIC calc_lib)		# Линковка программы с библиотекой
+set(SOURCE_EXE main_MPI_OpenMP.cpp)		        # Установка переменной со списком исходников для исполняемого файла
+add_executable(main_MPI_OpenMP ${SOURCE_EXE})		# Создает исполняемый файл с именем main_Sequent
+target_link_libraries(main_MPI_OpenMP PUBLIC calc_lib)		# Линковка программы с библиотекой
 # Связывание MPI с вашим исполняемым файлом
-target_link_libraries(main_MPI PUBLIC MPI::MPI_CXX)
+target_link_libraries(main_MPI_OpenMP PUBLIC MPI::MPI_CXX)
 
 
 

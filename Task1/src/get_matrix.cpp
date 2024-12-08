@@ -4,6 +4,7 @@
 #include <fstream>
 #include <vector>
 #include <omp.h> 
+#include <limits>
 
 #include "Point.hpp"
 #include "coeff_calc.hpp"
@@ -36,6 +37,48 @@ void get_matrixA(const std::vector<std::vector<double>>& a,
 }
 
 
+void get_matrixA(const double** a, const double**  b,
+        const int startX_Indx, const double**  w,
+        const double h1, const double h2,
+        const int Ns, const int Ms, double** matrix)
+{
+    double diff1, diff2;
+    for (int j = 1; j < Ns; j++)//y
+    {
+        for (int i = 1; i < Ms; i++)//x
+        {
+            diff1 = a[j][startX_Indx + i + 1] * (w[j][i + 1] - w[j][i]) -
+                        a[j][startX_Indx + i] * (w[j][i] - w[j][i - 1]);
+            diff2 = b[j + 1][startX_Indx + i] * (w[j + 1][i] - w[j][i]) -
+                        b[j][startX_Indx + i] * (w[j][i] - w[j - 1][i]);
+            matrix[j][i] = -diff1 / sqr(h1) - diff2 / sqr(h2);
+        }
+    }
+}
+
+
+
+void get_rk(const double** aCoeff, const double** bCoeff,
+        const double** B, const int startX_Indx,
+        const double** wk, const int Ns, const int Ms,
+        const double h1, const double h2,
+        double** r_k)
+{
+    // rk = Awk - B
+    for (int j = 1; j < Ns; j++)//y
+    {
+        for (int i = 1; i < Ms; i++)//x
+        {
+            double diff1 = aCoeff[j][startX_Indx + i + 1] * (wk[j][i + 1] - wk[j][i]) -
+                        aCoeff[j][startX_Indx + i] * (wk[j][i] - wk[j][i - 1]);
+            double diff2 = bCoeff[j + 1][startX_Indx + i] * (wk[j + 1][i] - wk[j][i]) -
+                        bCoeff[j][startX_Indx + i] * (wk[j][i] - wk[j - 1][i]);
+            r_k[j][i] = -diff1 / sqr(h1) - diff2 / sqr(h2) - B[j][startX_Indx + i];
+        }
+    }
+}
+
+
 
 
 void get_matrixB(const std::vector<std::vector<Point>>& grid,
@@ -47,6 +90,22 @@ void get_matrixB(const std::vector<std::vector<Point>>& grid,
     for (int j = 1; j < Ns - 1; j++)//y
     {
         for (int i = 1; i < Ms - 1; i++)//x
+        {
+            matrix[j][i] = get_fCoeff(grid[j][i].x - 0.5 * h1, grid[j][i].x + 0.5 * h1,
+                                      grid[j][i].y + 0.5 * h2, grid[j][i].y - 0.5 * h2);
+        }
+    }
+}
+
+
+void get_matrixB(const Point** grid,
+        const int Ns1, const int Ms1, double** matrix)
+{
+    double h1 = std::abs(grid[0][0].x - grid[0][1].x);
+    double h2 = std::abs(grid[0][0].y - grid[1][0].y);
+    for (int j = 1; j < Ns1 - 1; j++)//y
+    {
+        for (int i = 1; i < Ms1 - 1; i++)//x
         {
             matrix[j][i] = get_fCoeff(grid[j][i].x - 0.5 * h1, grid[j][i].x + 0.5 * h1,
                                       grid[j][i].y + 0.5 * h2, grid[j][i].y - 0.5 * h2);
@@ -74,6 +133,30 @@ void get_aCoeffMatrix(const std::vector<std::vector<Point>>& grid,
 }
 
 
+void get_aCoeffMatrix(const Point** grid,
+        const double eps, const int Ns1, const int Ms1,
+        double** matrix)
+{
+    double h1 = std::abs(grid[0][0].x - grid[0][1].x);
+    double h2 = std::abs(grid[0][0].y - grid[1][0].y);
+    for (int j = 1; j < Ns1; j++)//y
+    {
+        for (int i = 1; i < Ms1; i++)//x
+        {
+            matrix[j][i] = get_aCoeff(Point(grid[j][i].x - 0.5 * h1, grid[j][i].y + 0.5 * h2),
+                                      Point(grid[j][i].x - 0.5 * h1, grid[j][i].y - 0.5 * h2), eps);
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
 void get_bCoeffMatrix(const std::vector<std::vector<Point>>& grid,
         const double eps,
         std::vector<std::vector<double>>& matrix)
@@ -90,6 +173,28 @@ void get_bCoeffMatrix(const std::vector<std::vector<Point>>& grid,
         }
     }
 }
+
+
+void get_bCoeffMatrix(const Point** grid,
+        const double eps, const int Ns1, const int Ms1,
+        double** matrix)
+{
+    double h1 = std::abs(grid[0][0].x - grid[0][1].x);
+    double h2 = std::abs(grid[0][0].y - grid[1][0].y);
+    for (int j = 1; j < Ns1; j++)//y
+    {
+        for (int i = 1; i < Ms1; i++)//x
+        {
+            matrix[j][i] = get_bCoeff(Point(grid[j][i].x - 0.5 * h1, grid[j][i].y + 0.5 * h2),
+                                      Point(grid[j][i].x + 0.5 * h1, grid[j][i].y + 0.5 * h2), eps);
+        }
+    }
+}
+
+
+
+
+
 
 
 
@@ -174,7 +279,7 @@ void get_constMatrixOMP(const std::vector<std::vector<Point>>& grid,
     int Ns1 = grid.size(), Ms1 = grid[0].size();
     double h1 = std::abs(grid[0][0].x - grid[0][1].x);
     double h2 = std::abs(grid[0][0].y - grid[1][0].y);
-    #pragma omp parallel for
+    #pragma omp parallel for collapse(2)
     for (int j = 1; j < Ns1; j++)//y
     {
         for (int i = 1; i < Ms1; i++)//x
@@ -209,8 +314,7 @@ void get_constMatrixOMP(const Point** grid, const double eps,
                                       Point(grid[j][i].x - 0.5 * h1, grid[j][i].y - 0.5 * h2), eps);
             b_CoeffMatrix[j][i] = get_bCoeff(Point(grid[j][i].x - 0.5 * h1, grid[j][i].y + 0.5 * h2),
                                       Point(grid[j][i].x + 0.5 * h1, grid[j][i].y + 0.5 * h2), eps);
-            if (j != Ns1 - 1 && i != Ms1 - 1)
-            {
+            if (j < Ns1 - 1 && i < Ms1 - 1) {
                 B[j][i] = get_fCoeff(grid[j][i].x - 0.5 * h1, grid[j][i].x + 0.5 * h1,
                                       grid[j][i].y + 0.5 * h2, grid[j][i].y - 0.5 * h2);
             }
@@ -245,6 +349,7 @@ void get_rkOMP(const std::vector<std::vector<double>>& aCoeff,
         }
     }
 }
+
 
 
 // Для  указателей. Матрица в виде ленты.
@@ -286,54 +391,83 @@ void get_rkOMP(const double** aCoeff, const double** bCoeff,
 double get_IterParam_OMP(const std::vector<std::vector<double>>& aCoeff,
         const std::vector<std::vector<double>>& bCoeff,
         const double h1, const double h2,
-        const std::vector<std::vector<double>>& r_k,
-        std::vector<std::vector<double>>& Ar)
+        const std::vector<std::vector<double>>& r_k)
 {
     // A примененное к rk
     int Ns1 = r_k.size(), Ms1 = r_k[0].size();
-    #pragma omp parallel for collapse(2)
-    for (int j = 1; j < Ns1 - 1; j++)//y
+
+    // Нахождение итерационного параметра
+    double sum_num = 0., sum_denom = 0.;
+    #pragma omp parallel
     {
-        for (int i = 1; i < Ms1 - 1; i++)//x
+        double local_sum_num = 0.;
+        double local_sum_denom = 0.;
+
+        #pragma omp for collapse(2)
+        for (int j = 1; j < Ns1 - 1; j++) //y
         {
-            double diff1 = aCoeff[j][i + 1] * (r_k[j][i + 1] - r_k[j][i]) -
-                        aCoeff[j][i] * (r_k[j][i] - r_k[j][i - 1]);
-            double diff2 = bCoeff[j + 1][i] * (r_k[j + 1][i] - r_k[j][i]) -
-                        bCoeff[j][i] * (r_k[j][i] - r_k[j - 1][i]);
-            Ar[j][i] = -diff1 / sqr(h1) - diff2 / sqr(h2);
+            for (int i = 1; i < Ms1 - 1; i++) //x
+            {
+                double diff1 = aCoeff[j][i + 1] * (r_k[j][i + 1] - r_k[j][i]) -
+                               aCoeff[j][i] * (r_k[j][i] - r_k[j][i - 1]);
+                double diff2 = bCoeff[j + 1][i] * (r_k[j + 1][i] - r_k[j][i]) -
+                               bCoeff[j][i] * (r_k[j][i] - r_k[j - 1][i]);
+                double Arji = -diff1 / sqr(h1) - diff2 / sqr(h2);
+
+                local_sum_num += r_k[j][i] * r_k[j][i];
+                local_sum_denom += Arji * r_k[j][i];
+            }
+        }
+
+        #pragma omp critical
+        {
+            sum_num += local_sum_num;
+            sum_denom += local_sum_denom;
         }
     }
-    return scal_prod(r_k, r_k, h1, h2) /
-                 scal_prod(Ar, r_k, h1, h2);
+    
+    // Возврат результата
+    return sum_num / sum_denom;
 }
 
 
 
 
 
-
-void sol_StepOMP(const std::vector<std::vector<double>>& aCoeff,
+// Возвращает норму
+double sol_StepOMP(const std::vector<std::vector<double>>& aCoeff,
         const std::vector<std::vector<double>>& bCoeff,
         const std::vector<std::vector<double>>& wk,
         const std::vector<std::vector<double>>& B,
         const double h1, const double h2,
         std::vector<std::vector<double>>& r_k,
-        std::vector<std::vector<double>>& Ar,
         std::vector<std::vector<double>>& wk1)
 {
     // rk = Awk - B
     get_rkOMP(aCoeff, bCoeff, wk, B, h1, h2, r_k);
-    // tau_k1 = (rk, rk) / (Ark, rk)
-    double tau_k1 = get_IterParam_OMP(aCoeff, bCoeff, h1, h2, r_k, Ar);
 
-std::cout << tau_k1 << std::endl;
+    // tau_k1 = (rk, rk) / (Ark, rk)
+    double tau_k1 = get_IterParam_OMP(aCoeff, bCoeff, h1, h2, r_k);
 
     // wk1 = wk - tau_k1 * rk
     int Ns1 = wk.size(), Ms1 = wk[0].size();
-    #pragma omp parallel for collapse(2)
-    for (int j = 0; j < Ns1; j++) { //y
-        for (int i = 0; i < Ms1; i++) { //x
-            wk1[j][i] = wk[j][i] - tau_k1 * r_k[j][i];
+    double norm = 0.;
+    #pragma omp parallel
+    {
+        double private_max = 0.0;
+        #pragma omp for
+        for (int j = 0; j < Ns1; j++) { //y
+            for (int i = 0; i < Ms1; i++) { //x
+                double diff = tau_k1 * r_k[j][i];
+                wk1[j][i] = wk[j][i] - diff;
+                private_max = std::max(std::abs(diff), private_max);
+            }
+        }
+
+        #pragma omp critical
+        {
+            norm = std::max(norm, std::abs(private_max));
         }
     }
+    return norm;
 }

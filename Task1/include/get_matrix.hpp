@@ -11,8 +11,17 @@ void get_matrixA(const std::vector<std::vector<double>>& a,
         const double h1, const double h2,
         std::vector<std::vector<double>>& matrix);
 
+void get_matrixA(const double** a, const double**  b,
+        const int startX_Indx, const double**  w,
+        const double h1, const double h2,
+        const int Ns, const int Ms, double** matrix);
 
 
+void get_rk(const double** aCoeff, const double** bCoeff,
+        const double** B, const int startX_Indx,
+        const double** wk, const int Ns, const int Ms,
+        const double h1, const double h2,
+        double** r_k);
 
 
 //======================Константные матрицы==========================
@@ -20,15 +29,26 @@ void get_matrixA(const std::vector<std::vector<double>>& a,
 void get_matrixB(const std::vector<std::vector<Point>>& grid,
         std::vector<std::vector<double>>& matrix);
 
+void get_matrixB(const Point** grid,
+        const int Ns1, const int Ms1, double** matrix);
+
 
 void get_aCoeffMatrix(const std::vector<std::vector<Point>>& grid,
         const double eps,
         std::vector<std::vector<double>>& matrix);
 
+void get_aCoeffMatrix(const Point** grid,
+        const double eps, const int Ns1, const int Ms1,
+        double** matrix);
+
 
 void get_bCoeffMatrix(const std::vector<std::vector<Point>>& grid,
         const double eps,
         std::vector<std::vector<double>>& matrix);
+
+void get_bCoeffMatrix(const Point** grid,
+        const double eps, const int Ns1, const int Ms1,
+        double** matrix);
 
 
 
@@ -107,16 +127,14 @@ void get_rkOMP(const double** aCoeff, const double** bCoeff,
 double get_IterParam_OMP(const std::vector<std::vector<double>>& aCoeff,
         const std::vector<std::vector<double>>& bCoeff,
         const double h1, const double h2,
-        const std::vector<std::vector<double>>& r_k,
-        std::vector<std::vector<double>>& Ar);
+        const std::vector<std::vector<double>>& r_k);
 
-void sol_StepOMP(const std::vector<std::vector<double>>& aCoeff,
+double sol_StepOMP(const std::vector<std::vector<double>>& aCoeff,
         const std::vector<std::vector<double>>& bCoeff,
         const std::vector<std::vector<double>>& w,
         const std::vector<std::vector<double>>& B,
         const double h1, const double h2,
         std::vector<std::vector<double>>& r_k,
-        std::vector<std::vector<double>>& Ar,
         std::vector<std::vector<double>>& wk1);
 
 

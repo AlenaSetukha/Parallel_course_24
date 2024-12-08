@@ -56,7 +56,7 @@ int main(int argc, char **argv)
     }
 
     //========Запись сетки=========
-    write_GridToFile(result_dir, Ms, Ns, grid);
+    write_GridToFile(result_dir, grid);
 
 
 
@@ -101,7 +101,7 @@ int main(int argc, char **argv)
         }
     }
     //========Запись ответа========
-    write_SolToFile(result_dir, Ms, Ns, w_k);
+    write_SolToFile(result_dir, w_k);
     std::cout << "Предельное число шагов: " << k_max << std::endl;
     std::cout << "Достигнутая норма: " << norm << std::endl;
 

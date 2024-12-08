@@ -53,7 +53,7 @@ int main(int argc, char **argv)
     const double eps = std::max(h1, h2) * std::max(h1, h2);
     std::vector<std::vector<Point>> grid(Ns + 1, std::vector<Point>(Ms + 1));
 
-    #pragma omp parallel for
+    #pragma omp parallel for collapse(2)
     for (int j = 0; j < Ns + 1; j++) { //y
         for (int i = 0; i < Ms + 1; i++) { //x
             grid[j][i] = Point(A1 + i * h1, B2 - j * h2);
@@ -63,36 +63,25 @@ int main(int argc, char **argv)
 
 
 
-
     //===Набор константных матриц==
     std::vector<std::vector<double>> B(Ns + 1, std::vector<double>(Ms + 1, 0.));          // матрица B = F[i][j]
     std::vector<std::vector<double>> a_CoeffMatrix(Ns + 1, std::vector<double>(Ms + 1, 0.));  // матрица a[i][j]
     std::vector<std::vector<double>> b_CoeffMatrix(Ns + 1, std::vector<double>(Ms + 1, 0.));  // матрица b[i][j]
     get_constMatrixOMP(grid, eps, B, a_CoeffMatrix, b_CoeffMatrix);
 
-    write_MatrixToFile(result_dir + "a_coeff.txt", a_CoeffMatrix);
-    write_MatrixToFile(result_dir + "b_coeff.txt", b_CoeffMatrix);
-    write_MatrixToFile(result_dir + "B.txt", B);
-
 
     //=====Итерационный процесс====
     std::vector<std::vector<double>> w_k(Ns + 1, std::vector<double>(Ms + 1, 0.));      // стартовое приближение
     std::vector<std::vector<double>> w_k1(Ns + 1, std::vector<double>(Ms + 1, 0.));     // приближение на (k+1) шаге
     std::vector<std::vector<double>> r_k(Ns + 1, std::vector<double>(Ms + 1, 0.));      // невязка Awk - B
-    std::vector<std::vector<double>> Ar(Ns + 1, std::vector<double>(Ms + 1, 0.));       // Ar - заполняется на каждом шаге заново
 
     double norm;
     for (int k = 1; k < k_max; k++)
     {
-        sol_StepOMP(a_CoeffMatrix, b_CoeffMatrix, w_k, B,
-                h1, h2, r_k, Ar, w_k1);
-
-        norm = get_normC(w_k1, w_k);
+        norm = sol_StepOMP(a_CoeffMatrix, b_CoeffMatrix, w_k, B,
+                h1, h2, r_k, w_k1); // попробовать еще ускорит внутри
         
-std::cout << norm << std::endl;
-
-        if (norm < delta)
-        {
+        if (norm < delta) {
             std::cout << "Достигнута точность! Количество шагов: " << k << std::endl;
             break;
         } else {
