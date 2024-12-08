@@ -86,13 +86,14 @@ int main(int argc, char **argv)
             break;
         } else {
             #pragma omp parallel for collapse(2)
-            for (int j = 1; j < Ns - 1; j++) { //y
-                for (int i = 1; i < Ms - 1; i++) { //x
+            for (int j = 0; j < Ns + 1; j++) { //y
+                for (int i = 0; i < Ms + 1; i++) { //x
                     w_k[j][i] = w_k1[j][i];
                 }
             }
         }
     }
+
     std::cout << "Предельное число шагов: " << k_max << std::endl;
     std::cout << "Достигнутая норма: " << norm << std::endl;
     //========Запись ответа========

@@ -305,7 +305,7 @@ void get_constMatrixOMP(const Point** grid, const double eps,
 {
     double h1 = std::abs(grid[0][0].x - grid[0][1].x);
     double h2 = std::abs(grid[0][0].y - grid[1][0].y);
-    #pragma omp parallel for collapse(2)
+    #pragma omp parallel for
     for (int j = 1; j < Ns1; j++)//y
     {
         for (int i = 1; i < Ms1; i++)//x
@@ -314,7 +314,7 @@ void get_constMatrixOMP(const Point** grid, const double eps,
                                       Point(grid[j][i].x - 0.5 * h1, grid[j][i].y - 0.5 * h2), eps);
             b_CoeffMatrix[j][i] = get_bCoeff(Point(grid[j][i].x - 0.5 * h1, grid[j][i].y + 0.5 * h2),
                                       Point(grid[j][i].x + 0.5 * h1, grid[j][i].y + 0.5 * h2), eps);
-            if (j < Ns1 - 1 && i < Ms1 - 1) {
+            if ((j != Ns1 - 1) && (i != Ms1 - 1)) {
                 B[j][i] = get_fCoeff(grid[j][i].x - 0.5 * h1, grid[j][i].x + 0.5 * h1,
                                       grid[j][i].y + 0.5 * h2, grid[j][i].y - 0.5 * h2);
             }

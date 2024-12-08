@@ -20,7 +20,7 @@
 
 
 /**
- * mpi решение задачи Дирихле для уравнения Пуассона в области D
+ * mpi + OpenMP решение задачи Дирихле для уравнения Пуассона в области D
  * методом фиктивных областей. Сделано через double**.
  * 
  * Количество доменов = количество MPI процессов
@@ -95,11 +95,7 @@ int main(int argc, char **argv)
         std::fill(b_CoeffMatrix[j], b_CoeffMatrix[j] + Ms + 1, 0.0);
     }
 
-    get_matrixB((const Point**)grid, Ns + 1, Ms + 1, B);
-    get_aCoeffMatrix((const Point**)grid, eps, Ns + 1, Ms + 1, a_CoeffMatrix);
-    get_aCoeffMatrix((const Point**)grid, eps, Ns + 1, Ms + 1, b_CoeffMatrix);
-
-    //get_constMatrixOMP((const Point**)grid, eps, Ns + 1, Ms + 1, B, a_CoeffMatrix, b_CoeffMatrix);
+    get_constMatrixOMP((const Point**)grid, eps, Ns + 1, Ms + 1, B, a_CoeffMatrix, b_CoeffMatrix);
 
     //======================Разделение на процессы==================
     MPI_Init(&argc, &argv);
@@ -297,13 +293,36 @@ int main(int argc, char **argv)
          * Скалярное произведение считается во всех внутренних узлах,
          * оператор Ar - во внутренних, но использованием всех. 
          *-------------------------------------------------------------*/
-        double tau_loc_num = scal_prod((const double**)r_k_loc, (const double**)r_k_loc, N_ofDomen, M_ofDomen, h1, h2);
-
+        //double tau_loc_num = scal_prod((const double**)r_k_loc, (const double**)r_k_loc, N_ofDomen, M_ofDomen, h1, h2);
         get_matrixA_OMP((const double**)(a_CoeffMatrix + startY_Indx),
                 (const double**)(b_CoeffMatrix + startY_Indx), startX_Indx, 
-                (const double**)r_k_loc, h1, h2, N_ofDomen, M_ofDomen, Ar_loc);
-                
-        double tau_loc_denom = scal_prod((const double**)Ar_loc, (const double**)r_k_loc, N_ofDomen, M_ofDomen, h1, h2);
+                (const double**)r_k_loc, h1, h2, N_ofDomen, M_ofDomen, Ar_loc);      
+        //double tau_loc_denom = scal_prod((const double**)Ar_loc, (const double**)r_k_loc, N_ofDomen, M_ofDomen, h1, h2);
+
+        double tau_loc_num = 0., tau_loc_denom = 0.;
+
+        #pragma omp parallel
+        {
+            double local_sum_num = 0.;
+            double local_sum_denom = 0.;
+
+            #pragma omp for collapse(2)
+            for (int j = 1; j < N_ofDomen - 1; j++) //y
+            {
+                for (int i = 1; i < M_ofDomen - 1; i++) //x
+                {
+                    local_sum_num += r_k_loc[j][i] * r_k_loc[j][i];
+                    local_sum_denom += Ar_loc[j][i] * r_k_loc[j][i];
+                }
+            }
+
+            #pragma omp critical
+            {
+                tau_loc_num += local_sum_num;
+                tau_loc_denom += local_sum_denom;
+            }
+        }
+
 
 
         // Нужно в каком либо процессе вычесть полоску двойных произведенмй, которая посчиталась дважды
